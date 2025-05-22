@@ -7,7 +7,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +44,7 @@ class RewriteURLFilterTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = { "/foo/qux", "/bar" })
+    @ValueSource(strings = {"/foo/qux", "/bar"})
     void getRewrittenUrlNoMatch(String url) {
         final List<RewriteRule> rules = List.of(
                 RewriteRule.of("/foo", "/a")
@@ -96,5 +95,4 @@ class RewriteURLFilterTest {
                 Arguments.of("/foo?", "/foo", "?")
         );
     }
-
 }
