@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 /**
@@ -45,7 +46,8 @@ public final class RewrittenURLs {
             return REWRITE_RULES;
         }
         try {
-            final NodeList nodeList = getUrlMappingNodes();
+            final NodeList nodeList = getUrlMappingNodes()
+                    .orElseThrow(() -> new IOException("Unable to load rewrite-url.xml"));
             return IntStream.range(0, nodeList.getLength())
                     .boxed()
                     .map(nodeList::item)
@@ -91,11 +93,15 @@ public final class RewrittenURLs {
         return "";
     }
 
-    private static NodeList getUrlMappingNodes() throws ParserConfigurationException, SAXException, IOException {
-        final InputStream input = RewrittenURLs.class.getResourceAsStream("/META-INF/rewrite-url.xml");
+    private static Optional<NodeList> getUrlMappingNodes() throws ParserConfigurationException, SAXException, IOException {
+        final InputStream input = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream("/META-INF/rewrite-url.xml");
+        if (input == null) {
+            return Optional.empty();
+        }
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         final Document doc = dBuilder.parse(input);
-        return doc.getElementsByTagName("url-mapping");
+        return Optional.of(doc.getElementsByTagName("url-mapping"));
     }
 }
