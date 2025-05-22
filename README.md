@@ -7,8 +7,9 @@ Jakarta Server Faces (JSF) library to allow pretty URLs in JSF applications.
 1. Add the dependency to your project in the usual manner.
 2. Add a `rewrite-url.xml` to the `META-INF` directory - see [rewrite-url.xml](#rewrite-urlxml) for details.
 3. Add the `Pathfaces` rewrite filter to your `web.xml` - see [faces-config.xml](#faces-configxml) for details.
+4. Register the filter in your application
 
-## rewrite-url.xml
+### rewrite-url.xml
 
 Below is an example entry for `rewrite-url.xml`:
 
@@ -21,7 +22,7 @@ Below is an example entry for `rewrite-url.xml`:
 
 With this mapping in place the URL `/home/hello-world` will be rewritten to `/index.xhtml?title=hello-world`.
 
-## faces-config.xml
+### faces-config.xml
 
 Below is an example entry for `faces-config.xml`:
 
@@ -36,6 +37,32 @@ Below is an example entry for `faces-config.xml`:
     </application>
 </faces-config>
 ```
+
+### Registering the Filter
+
+An example class which needs to be added to your project to register the filter is shown below.
+This class should be in the `src/main/java` directory of your project.
+
+```java
+import jakarta.servlet.FilterRegistration;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
+import me.mwinton.pathfaces.RewriteURLFilter;
+
+@WebListener
+public class FilterRegistrationListener implements ServletContextListener {
+
+    @Override
+    public void contextInitialized(ServletContextEvent sce) {
+        final ServletContext context = sce.getServletContext();
+        final FilterRegistration.Dynamic filter = context.addFilter("RewriteURLFilter", RewriteURLFilter.class);
+        filter.addMappingForUrlPatterns(null, true, "/*");
+    }
+}
+```
+
 
 ## License
 
