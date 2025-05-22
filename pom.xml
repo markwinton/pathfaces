@@ -7,6 +7,7 @@
     <groupId>me.mwinton</groupId>
     <artifactId>pathfaces</artifactId>
     <version>1.0.0</version>
+    <packaging>jar</packaging>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -26,30 +27,24 @@
 
     <licenses>
         <license>
-            <name>MIT</name>
-            <url>https://opensource.org/license/mit/</url>
-            <distribution>repo</distribution>
-            <comments>A business-friendly OSS license</comments>
+            <name>MIT License</name>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
         </license>
     </licenses>
-
-    <organization>
-        <name>Mark Winton</name>
-        <url>https://mwinton.me</url>
-    </organization>
 
     <developers>
         <developer>
             <id>mwinton</id>
             <name>Mark Winton</name>
-            <url>https://mwinton.me</url>
+            <email>markwinton@gmail.com</email>
+            <url>https://bitbucket.org/mark-winton/pathfaces</url>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:https://bitbucket.org/mark-winton/pathfaces.git</connection>
-        <tag>HEAD</tag>
-        <url>https://bitbucket.org/mark-winton/pathfaces</url>
+        <connection>scm:git:git://bitbucket.org/mark-winton/pathfaces.git</connection>
+        <developerConnection>scm:git:ssh://bitbucket.org/mark-winton/pathfaces.git</developerConnection>
+        <url>https://bitbucket.org/mark-winton/pathfaces/src</url>
     </scm>
 
     <dependencies>
