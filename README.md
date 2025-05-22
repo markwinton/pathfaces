@@ -1,6 +1,6 @@
 # Pathfaces
 
-Java Server Faces (JSF) library to allow pretty URLs in JSF applications.
+Jakarta Server Faces (JSF) library to allow pretty URLs in JSF applications.
 
 ## Usage
 
@@ -32,7 +32,7 @@ Below is an example entry for `faces-config.xml`:
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
     <application>
-        <view-handler>dev.markwinton.pathfaces.RewriteURLFilter</view-handler>
+        <view-handler>me.mwinton.pathfaces.RewriteViewHandler</view-handler>
     </application>
 </faces-config>
 ```

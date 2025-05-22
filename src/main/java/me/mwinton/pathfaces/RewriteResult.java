@@ -1,4 +1,4 @@
-package dev.markwinton.pathfaces;
+package me.mwinton.pathfaces;
 
 import java.util.List;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package dev.markwinton.pathfaces;
+package me.mwinton.pathfaces;
 
 import jakarta.faces.application.ViewHandler;
 import jakarta.faces.application.ViewHandlerWrapper;
@@ -10,9 +10,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Rewrites links created by, say, h:link to point to the pretty URL.
+ * <p>Rewrites links created by, say, h:link to point to the pretty URL.</p>
+ * <p>Needs to be registered via the faces-config.xml file - see the README.md file for details.</p>
  */
-// TODO class needs a refactor
 public class RewriteViewHandler extends ViewHandlerWrapper {
 
     private static final List<RewriteRule> REWRITE_RULES = new ArrayList<>();
@@ -25,6 +25,11 @@ public class RewriteViewHandler extends ViewHandlerWrapper {
         }
     }
 
+    /**
+     * <p>Rewrites the URL to the pretty URL, if a rewrite rule exists.</p>
+     * <p>Parameters are inserted into the URL's path and removed from the
+     * parameters map in the process; any remaining parameters are appended as a query string.</p>
+     */
     @Override
     public String getBookmarkableURL(
             final FacesContext context, final String viewId, final Map<String, List<String>> parameters,
@@ -41,7 +46,8 @@ public class RewriteViewHandler extends ViewHandlerWrapper {
     }
 
     private static RewriteResult getRewrittenUrl(
-            final String contextPath, final String actionURL, final Map<String, List<String>> params
+            final String contextPath, final String actionURL,
+            final Map<String, List<String>> params
     ) {
         final ActionDetails actionDetails = getActionDetails(actionURL);
         final String action = actionDetails.baseUrl()

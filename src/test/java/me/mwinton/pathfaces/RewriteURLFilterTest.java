@@ -1,4 +1,4 @@
-package dev.markwinton.pathfaces;
+package me.mwinton.pathfaces;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;

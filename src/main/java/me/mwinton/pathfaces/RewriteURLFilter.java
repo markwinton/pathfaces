@@ -1,4 +1,4 @@
-package dev.markwinton.pathfaces;
+package me.mwinton.pathfaces;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
@@ -16,38 +16,31 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 
-// TODO class needs a refactor
 @WebFilter(urlPatterns = {"/*"}, asyncSupported = true)
 public class RewriteURLFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RewriteURLFilter.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RewriteURLFilter.class);
     private List<RewriteRule> rewriteRules;
 
     @Override
     public void init(FilterConfig filterConfig) {
-        LOGGER.info("Initializing the RewriteURLFilter class");
         rewriteRules = RewrittenURLs.getInstance().getRewriteRules();
-
         if (rewriteRules != null && !rewriteRules.isEmpty()) {
-            LOGGER.info("URLs to be rewritten have been detected");
-            rewriteRules.forEach(rule -> LOGGER.info(rule.toString()));
+            LOG.info("Pathfaces configuration detected:");
+            rewriteRules.forEach(rule -> LOG.info(rule.toString()));
         }
         else {
-            LOGGER.info("No URLs to be rewritten have been detected");
+            LOG.warn("No Pathfaces rules have been configured");
         }
-    }
-
-    @Override
-    public void destroy() {
-        LOGGER.info("Destroying the RewriteURLFilter class");
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         final HttpServletRequestWrapper wrapper = new HttpServletRequestWrapper((HttpServletRequest) request);
-        final String original = wrapper.getRequestURI().substring(wrapper.getContextPath().length());
-
-        final RequestDetails requestDetails = getRequestDetails(original);
+        final int contextPathLength = wrapper.getContextPath().length();
+        final String originalPath = wrapper.getRequestURI()
+                .substring(contextPathLength);
+        final RequestDetails requestDetails = getRequestDetails(originalPath);
         final String rewriteUrl = getRewrittenUrl(rewriteRules, requestDetails);
         if (rewriteUrl != null && !rewriteUrl.isBlank()) {
             final RequestDispatcher dispatcher = wrapper.getRequestDispatcher(rewriteUrl);
@@ -58,18 +51,12 @@ public class RewriteURLFilter implements Filter {
     }
 
     static RequestDetails getRequestDetails(final String original) {
-        final String requestUrlWithoutParam;
-        final String requestParams;
-
-        int indexOfParam = original.indexOf('?');
-        if (indexOfParam != -1) {
-            requestUrlWithoutParam = original.substring(0, indexOfParam);
-            requestParams = original.substring(indexOfParam);
+        final int indexOfParam = original.indexOf('?');
+        if (indexOfParam == -1) {
+            return new RequestDetails(original, "");
         }
-        else {
-            requestUrlWithoutParam = original;
-            requestParams = "";
-        }
+        final String requestUrlWithoutParam = original.substring(0, indexOfParam);
+        final String requestParams = original.substring(indexOfParam);
         return new RequestDetails(requestUrlWithoutParam, requestParams);
     }
 

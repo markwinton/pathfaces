@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>dev.markwinton</groupId>
+    <groupId>me.mwinton</groupId>
     <artifactId>pathfaces</artifactId>
     <version>1.0.0</version>
 
@@ -12,12 +12,45 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit-jupiter.version>5.12.2</junit-jupiter.version>
-        <assertj.version>3.27.3</assertj.version>
+        <servlet.version>6.1.0</servlet.version>
         <jakarta.faces.version>4.1.2</jakarta.faces.version>
         <slf4j.version>2.0.16</slf4j.version>
-        <servlet.version>6.1.0</servlet.version>
+        <junit-jupiter.version>5.12.2</junit-jupiter.version>
+        <assertj.version>3.27.3</assertj.version>
     </properties>
+
+    <name>Pathfaces</name>
+    <description>Path-based mapping for Jakarta Server Faces projects</description>
+    <url>https://bitbucket.org/mark-winton/pathfaces</url>
+    <inceptionYear>2025</inceptionYear>
+
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/license/mit/</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <organization>
+        <name>Mark Winton</name>
+        <url>https://mwinton.me</url>
+    </organization>
+
+    <developers>
+        <developer>
+            <id>mwinton</id>
+            <name>Mark Winton</name>
+            <url>https://mwinton.me</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://bitbucket.org/mark-winton/pathfaces.git</connection>
+        <tag>HEAD</tag>
+        <url>https://bitbucket.org/mark-winton/pathfaces</url>
+    </scm>
 
     <dependencies>
         <dependency>

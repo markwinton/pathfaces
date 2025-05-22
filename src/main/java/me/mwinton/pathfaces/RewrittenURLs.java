@@ -1,5 +1,6 @@
-package dev.markwinton.pathfaces;
+package me.mwinton.pathfaces;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -16,10 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 
-// TODO class needs a refactor
-public class RewrittenURLs {
-    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(RewrittenURLs.class);
+/**
+ * Singleton class to load and manage URL rewrite rules from an XML configuration file.
+ */
+public final class RewrittenURLs {
 
+    private static final Logger LOG = LoggerFactory.getLogger(RewrittenURLs.class);
     private static final RewrittenURLs INSTANCE = new RewrittenURLs();
     private static final List<RewriteRule> REWRITE_RULES = new ArrayList<>();
 
@@ -32,7 +35,7 @@ public class RewrittenURLs {
 
     public List<RewriteRule> getRewriteRules() {
         if (REWRITE_RULES.isEmpty()) {
-            REWRITE_RULES.addAll(this.loadRewriteRules());
+            REWRITE_RULES.addAll(loadRewriteRules());
         }
         return REWRITE_RULES;
     }
@@ -50,40 +53,42 @@ public class RewrittenURLs {
                     .map(n -> getRewriteRules((Element) n))
                     .toList();
         }
-        catch (ParserConfigurationException | IOException | SAXException ex) {
-            LOGGER.error(ex.getMessage(), ex);
+        catch (ParserConfigurationException | IOException | SAXException e) {
+            LOG.error("Pathfaces configuration error: %s".formatted(e.getMessage()), e);
         }
         return List.of();
     }
 
     private static RewriteRule getRewriteRules(final Element node) {
         final String id = node.getAttribute("id");
-        String pattern = null;
-        String viewId = null;
-        final NodeList patternNodeList = node.getElementsByTagName("pattern");
+        final String pattern = getElementValue(node, "pattern");
+        final String viewId = getElementValue(node, "view-id");
+
+        if (!pattern.isBlank() && !viewId.isBlank()) {
+            final RewriteRule rewriteRule = RewriteRule.of(pattern, viewId);
+            LOG.debug("Adding URL mapping, id {}, pattern {} -> view-id {} ", id, pattern, viewId);
+            return rewriteRule;
+        }
+        return null;
+    }
+
+    /**
+     * Obtain the specified <code>tagName</code> from the given <code>node</code>; returns
+     * an empty string if the tag is not found.
+     * @param node The node to search; cannot be null.
+     * @param tagName The tag name to search for; cannot be null.
+     * @return Possibly empty, never null.
+     */
+    private static String getElementValue(final Element node, final String tagName) {
+        final NodeList patternNodeList = node.getElementsByTagName(tagName);
         if (patternNodeList.getLength() > 0) {
             final Node patternNode = patternNodeList.item(0);
             if (patternNode.getNodeType() == Node.ELEMENT_NODE) {
                 final Element patternElement = (Element) patternNode;
-                pattern = patternElement.getAttribute("value");
+                return patternElement.getAttribute("value");
             }
         }
-
-        final NodeList viewIdNodeList = node.getElementsByTagName("view-id");
-        if (viewIdNodeList.getLength() > 0) {
-            final Node viewIdNode = viewIdNodeList.item(0);
-            if (viewIdNode.getNodeType() == Node.ELEMENT_NODE) {
-                final Element viewIdElement = (Element) viewIdNode;
-                viewId = viewIdElement.getAttribute("value");
-            }
-        }
-
-        if (pattern != null && viewId != null) {
-            final RewriteRule rewriteRule = RewriteRule.of(pattern, viewId);
-            LOGGER.info("Registering url mapping id {}: pattern {} -> view-id {} ", id, pattern, viewId);
-            return rewriteRule;
-        }
-        return null;
+        return "";
     }
 
     private static NodeList getUrlMappingNodes() throws ParserConfigurationException, SAXException, IOException {
