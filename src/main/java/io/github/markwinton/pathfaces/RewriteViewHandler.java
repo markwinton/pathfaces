@@ -1,4 +1,4 @@
-package me.mwinton.pathfaces;
+package io.github.markwinton.pathfaces;
 
 import jakarta.faces.application.ViewHandler;
 import jakarta.faces.application.ViewHandlerWrapper;

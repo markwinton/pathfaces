@@ -33,7 +33,7 @@ Below is an example entry for `faces-config.xml`:
               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
               xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd">
     <application>
-        <view-handler>me.mwinton.pathfaces.RewriteViewHandler</view-handler>
+        <view-handler>io.github.markwinton.pathfaces.RewriteViewHandler</view-handler>
     </application>
 </faces-config>
 ```
@@ -49,7 +49,7 @@ import jakarta.servlet.ServletContext;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import me.mwinton.pathfaces.RewriteURLFilter;
+import io.github.markwinton.pathfaces.RewriteURLFilter;
 
 @WebListener
 public class FilterRegistrationListener implements ServletContextListener {

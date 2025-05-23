@@ -1,4 +1,4 @@
-package me.mwinton.pathfaces;
+package io.github.markwinton.pathfaces;
 
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;

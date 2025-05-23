@@ -1,4 +1,4 @@
-package me.mwinton.pathfaces;
+package io.github.markwinton.pathfaces;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
