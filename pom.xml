@@ -22,7 +22,7 @@
 
     <name>Pathfaces</name>
     <description>Path-based mapping for Jakarta Server Faces projects</description>
-    <url>https://bitbucket.org/mark-winton/pathfaces</url>
+    <url>https://github.com/markwinton/pathfaces</url>
     <inceptionYear>2025</inceptionYear>
 
     <licenses>
@@ -36,15 +36,14 @@
         <developer>
             <id>mwinton</id>
             <name>Mark Winton</name>
-            <email>markwinton@gmail.com</email>
-            <url>https://bitbucket.org/mark-winton/pathfaces</url>
+            <email>markwinton+pathfaces@gmail.com</email>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://bitbucket.org/mark-winton/pathfaces.git</connection>
-        <developerConnection>scm:git:ssh://bitbucket.org/mark-winton/pathfaces.git</developerConnection>
-        <url>https://bitbucket.org/mark-winton/pathfaces/src</url>
+        <connection>scm:git:git://github.com/markwinton/pathfaces.git</connection>
+        <developerConnection>scm:git:ssh://github.com/markwinton/pathfaces.git</developerConnection>
+        <url>https://github.com/markwinton/pathfaces</url>
     </scm>
 
     <distributionManagement>
