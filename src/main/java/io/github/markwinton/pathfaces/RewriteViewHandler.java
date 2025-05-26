@@ -16,12 +16,14 @@ import java.util.Map;
 public class RewriteViewHandler extends ViewHandlerWrapper {
 
     private static final List<RewriteRule> REWRITE_RULES = new ArrayList<>();
+    private static final List<IgnoredPath> IGNORED_PATHS = new ArrayList<>();
 
     public RewriteViewHandler(final ViewHandler wrapped) {
         super(wrapped);
-        final List<RewriteRule> rewrittenUrls = RewrittenURLs.getInstance().getRewriteRules();
-        if (rewrittenUrls != null) {
-            REWRITE_RULES.addAll(rewrittenUrls);
+        final RewriteConfig rewriteConfig = RewrittenURLs.getRewriteConfig();
+        if (rewriteConfig != null) {
+            REWRITE_RULES.addAll(rewriteConfig.rewriteRules());
+            IGNORED_PATHS.addAll(rewriteConfig.ignoredPaths());
         }
     }
 
@@ -52,12 +54,20 @@ public class RewriteViewHandler extends ViewHandlerWrapper {
         final ActionDetails actionDetails = getActionDetails(actionURL);
         final String action = actionDetails.baseUrl()
                 .substring(contextPath.length());
+        final RewriteResult defaultAction = new RewriteResult(actionURL, params);
+
+        // Check if the action is ignored, if not then look for a rewrite rule
+        final boolean isIgnoredPath = IGNORED_PATHS.stream()
+                .anyMatch(ip -> ip.matches(action));
+        if (isIgnoredPath) {
+            return defaultAction;
+        }
 
         return REWRITE_RULES.stream()
                 .filter(rule -> rule.targetPath().equals(action))
                 .findFirst()
                 .map(rule -> rule.insertPathParams(params))
-                .orElse(new RewriteResult(actionURL, params));
+                .orElse(defaultAction);
     }
 
     private static ActionDetails getActionDetails(final String actionURL) {
