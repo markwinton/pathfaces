@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
  *                        {@link #of(String, String)} method to create an instance.
  */
 public record RewriteRule(
+        String id,
         String prettyUrl,
         String targetPath,
         String urlPatternRegex
@@ -36,8 +37,13 @@ public record RewriteRule(
     private static final String PLACEHOLDER_REPLACEMENT = "([^/]+)";
 
     public static RewriteRule of(final String unmodifiedPath, final String targetPath) {
+        final String id = unmodifiedPath.replaceAll("[^a-zA-Z0-9]", "_");
+        return RewriteRule.of(id, unmodifiedPath, targetPath);
+    }
+
+    public static RewriteRule of(final String id, final String unmodifiedPath, final String targetPath) {
         final String prettyUrlPatternRegex = unmodifiedPath.replaceAll(PLACEHOLDER_REGEX, PLACEHOLDER_REPLACEMENT);
-        return new RewriteRule(unmodifiedPath, targetPath, prettyUrlPatternRegex);
+        return new RewriteRule(id, unmodifiedPath, targetPath, prettyUrlPatternRegex);
     }
 
     public String basePath() {

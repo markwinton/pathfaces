@@ -13,9 +13,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.IntStream;
 
 /**
@@ -24,41 +23,46 @@ import java.util.stream.IntStream;
 public final class RewrittenURLs {
 
     private static final Logger LOG = LoggerFactory.getLogger(RewrittenURLs.class);
-    private static final RewrittenURLs INSTANCE = new RewrittenURLs();
-    private static final List<RewriteRule> REWRITE_RULES = new ArrayList<>();
+    private static RewriteConfig rewriteConfig;
 
     private RewrittenURLs() {
     }
 
-    public static RewrittenURLs getInstance() {
-        return INSTANCE;
-    }
-
-    public List<RewriteRule> getRewriteRules() {
-        if (REWRITE_RULES.isEmpty()) {
-            REWRITE_RULES.addAll(loadRewriteRules());
+    public static RewriteConfig getRewriteConfig() {
+        if (rewriteConfig == null) {
+            rewriteConfig = loadRewriteRules();
         }
-        return REWRITE_RULES;
+        return rewriteConfig;
     }
 
-    private synchronized List<RewriteRule> loadRewriteRules() {
-        if (!REWRITE_RULES.isEmpty()) {
-            return REWRITE_RULES;
+    private static synchronized RewriteConfig loadRewriteRules() {
+        if (rewriteConfig != null) {
+            return rewriteConfig;
         }
         try {
-            final NodeList nodeList = getUrlMappingNodes()
-                    .orElseThrow(() -> new IOException("Unable to load rewrite-url.xml"));
-            return IntStream.range(0, nodeList.getLength())
-                    .boxed()
-                    .map(nodeList::item)
-                    .filter(n -> n.getNodeType() == Node.ELEMENT_NODE)
-                    .map(n -> getRewriteRules((Element) n))
-                    .toList();
+            final Document loadedXmlConfig = loadRewriteConfigFile();
+            final List<RewriteRule> rewriteRules
+                    = parseRewriteRules(loadedXmlConfig, "url-mapping", n -> getRewriteRules((Element) n));
+            final List<IgnoredPath> ignoredPaths
+                    = parseRewriteRules(loadedXmlConfig, "ignored-path", n -> getIgnoredPaths((Element) n));
+            return new RewriteConfig(rewriteRules, ignoredPaths);
         }
         catch (ParserConfigurationException | IOException | SAXException e) {
             LOG.error("Pathfaces configuration error: %s".formatted(e.getMessage()), e);
         }
-        return List.of();
+        return RewriteConfig.empty();
+    }
+
+    private static <T> List<T> parseRewriteRules(
+            final Document loadedXmlConfig, final String tagName, Function<Node, T> elementParser
+    ) {
+        final NodeList nodeList = loadedXmlConfig.getElementsByTagName(tagName);
+        return IntStream.range(0, nodeList.getLength())
+                .boxed()
+                .map(nodeList::item)
+                .filter(n -> n.getNodeType() == Node.ELEMENT_NODE)
+                .map(elementParser)
+                .toList();
     }
 
     private static RewriteRule getRewriteRules(final Element node) {
@@ -67,9 +71,22 @@ public final class RewrittenURLs {
         final String viewId = getElementValue(node, "view-id");
 
         if (!pattern.isBlank() && !viewId.isBlank()) {
-            final RewriteRule rewriteRule = RewriteRule.of(pattern, viewId);
+            final RewriteRule rewriteRule = RewriteRule.of(id, pattern, viewId);
             LOG.debug("Adding URL mapping, id {}, pattern {} -> view-id {} ", id, pattern, viewId);
             return rewriteRule;
+        }
+        return null;
+    }
+
+    private static IgnoredPath getIgnoredPaths(final Element node) {
+        final String id = node.getAttribute("id");
+        final String path = getElementValue(node, "path");
+        final boolean isExact = Boolean.parseBoolean(getElementValue(node, "is-exact"));
+        if (!path.isBlank()) {
+            final IgnoredPath ignoredPath = IgnoredPath.of(id, path, isExact);
+            LOG.debug("Excluding path from Pathfaces URL rewrites, id {}, path {}, exact matches only {}",
+                    id, path, isExact);
+            return ignoredPath;
         }
         return null;
     }
@@ -93,15 +110,16 @@ public final class RewrittenURLs {
         return "";
     }
 
-    private static Optional<NodeList> getUrlMappingNodes() throws ParserConfigurationException, SAXException, IOException {
+    private static Document loadRewriteConfigFile()
+            throws ParserConfigurationException, SAXException, IOException {
         final InputStream input = Thread.currentThread().getContextClassLoader()
                 .getResourceAsStream("/META-INF/rewrite-url.xml");
         if (input == null) {
-            return Optional.empty();
+            throw new IOException("Unable to load rewrite-url.xml");
         }
         final DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         final DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        final Document doc = dBuilder.parse(input);
-        return Optional.of(doc.getElementsByTagName("url-mapping"));
+        return dBuilder.parse(input);
     }
+
 }

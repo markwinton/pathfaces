@@ -20,14 +20,20 @@ import java.util.List;
 public class RewriteURLFilter implements Filter {
 
     private static final Logger LOG = LoggerFactory.getLogger(RewriteURLFilter.class);
-    private List<RewriteRule> rewriteRules;
+    private RewriteConfig rewriteConfig;
 
     @Override
     public void init(FilterConfig filterConfig) {
-        rewriteRules = RewrittenURLs.getInstance().getRewriteRules();
-        if (rewriteRules != null && !rewriteRules.isEmpty()) {
+        rewriteConfig = RewrittenURLs.getRewriteConfig();
+        if (rewriteConfig != null && !rewriteConfig.rewriteRules().isEmpty()) {
             LOG.info("Pathfaces configuration detected:");
-            rewriteRules.forEach(rule -> LOG.info(rule.toString()));
+            rewriteConfig.rewriteRules().forEach(rule -> LOG.info(rule.toString()));
+
+            final List<IgnoredPath> ignoredPaths = rewriteConfig.ignoredPaths();
+            if (!ignoredPaths.isEmpty()) {
+                LOG.info("Pathfaces rewrite will be ignored for the following paths:");
+                ignoredPaths.forEach(rule -> LOG.info(rule.toString()));
+            }
         }
         else {
             LOG.warn("No Pathfaces rules have been configured");
@@ -41,7 +47,7 @@ public class RewriteURLFilter implements Filter {
         final String originalPath = wrapper.getRequestURI()
                 .substring(contextPathLength);
         final RequestDetails requestDetails = getRequestDetails(originalPath);
-        final String rewriteUrl = getRewrittenUrl(rewriteRules, requestDetails);
+        final String rewriteUrl = getRewrittenUrl(rewriteConfig, requestDetails);
         if (rewriteUrl != null && !rewriteUrl.isBlank()) {
             final RequestDispatcher dispatcher = wrapper.getRequestDispatcher(rewriteUrl);
             dispatcher.forward(request, response);
@@ -61,10 +67,25 @@ public class RewriteURLFilter implements Filter {
     }
 
     static String getRewrittenUrl(
+            final RewriteConfig rewriteConfig, final RequestDetails requestDetails
+    ) {
+        final String requestUrlWithoutParam = requestDetails.requestUrlWithoutParam();
+        // Is the path one being ignored by Pathfaces?
+        if (rewriteConfig.ignoredPaths().stream()
+                .anyMatch(ignoredPath -> ignoredPath.matches(requestUrlWithoutParam))) {
+            return null;
+        }
+
+        final List<RewriteRule> rewriteRules = rewriteConfig.rewriteRules();
+        return getRewrittenUrl(rewriteRules, requestDetails);
+    }
+
+    static String getRewrittenUrl(
             final List<RewriteRule> rewriteRules, final RequestDetails requestDetails
     ) {
         final String requestUrlWithoutParam = requestDetails.requestUrlWithoutParam();
         final String requestParams = requestDetails.requestParams();
+
         // Do any of the base paths exactly match the URL - if so that takes precedence
         for (final RewriteRule rewriteRule : rewriteRules) {
             final String unmodifiedPath = rewriteRule.prettyUrl();

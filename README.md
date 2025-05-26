@@ -9,9 +9,13 @@ Jakarta Server Faces (JSF) library to allow pretty URLs in JSF applications.
 3. Add the `Pathfaces` rewrite filter to your `web.xml` - see [faces-config.xml](#faces-configxml) for details.
 4. Register the filter in your application
 
-### rewrite-url.xml
+## rewrite-url.xml
 
-Below is an example entry for `rewrite-url.xml`:
+Below are example entries for `rewrite-url.xml`.
+
+### Rewrite URL
+
+With the following mapping in place the URL `/home/hello-world` will be rewritten to `/index.xhtml?title=hello-world`.
 
 ```xml
 <url-mapping id="home">
@@ -20,9 +24,28 @@ Below is an example entry for `rewrite-url.xml`:
 </url-mapping>
 ```
 
-With this mapping in place the URL `/home/hello-world` will be rewritten to `/index.xhtml?title=hello-world`.
+### Ignore URL
 
-### faces-config.xml
+With the following mapping in place any calls to `/api/` and `/api/*` will be omitted from any other path matching:
+
+```xml
+<ignored-path>
+    <path value="/api/"/>
+    <is-exact value="false"/>
+</ignored-path>
+```
+
+With the following mapping in place any calls to `/api/` will be omitted from any other path matching, but only if
+the path is an exact match - for example `/api/` will be ignored, but `/api/some-action` will not.
+
+```xml
+<ignored-path>
+    <path value="/api/"/>
+    <is-exact value="true"/>
+</ignored-path>
+```
+
+## faces-config.xml
 
 Below is an example entry for `faces-config.xml`:
 
@@ -38,7 +61,7 @@ Below is an example entry for `faces-config.xml`:
 </faces-config>
 ```
 
-### Registering the Filter
+## Registering the Filter
 
 An example class which needs to be added to your project to register the filter is shown below.
 This class should be in the `src/main/java` directory of your project.

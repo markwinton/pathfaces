@@ -95,4 +95,51 @@ class RewriteURLFilterTest {
                 Arguments.of("/foo?", "/foo", "?")
         );
     }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/foo", "/foo/", "/foobar", "/foo/bar", "/foo/bar/baz"})
+    void getRewrittenUrlIgnoredPathTakesPriorityInexactMatch(String url) {
+        final RewriteConfig rewriteConfig = new RewriteConfig(
+                List.of(RewriteRule.of("/#{title}", "/a")),
+                List.of(IgnoredPath.of("ignored", "/foo", false))
+        );
+        final RequestDetails requestDetails = new RequestDetails(url, "");
+        assertThat(RewriteURLFilter.getRewrittenUrl(rewriteConfig, requestDetails))
+                .isNull();
+    }
+
+    @Test
+    void getRewrittenUrlIgnoredPathTakesPriorityExactMatch() {
+        final RewriteConfig rewriteConfig = new RewriteConfig(
+                List.of(RewriteRule.of("/foo#{title}", "/a")),
+                List.of(IgnoredPath.of("ignored", "/foo", true))
+        );
+        final RequestDetails requestDetails = new RequestDetails("/foo", "");
+        assertThat(RewriteURLFilter.getRewrittenUrl(rewriteConfig, requestDetails))
+                .isNull();
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"/", "bar", "/bar", "/bar/baz"})
+    void getRewrittenUrlNotIgnoredPathExactMatches(String suffix) {
+        final String rulePath = "/foo" + suffix;
+        final RewriteConfig rewriteConfig = new RewriteConfig(
+                List.of(RewriteRule.of(rulePath, "/a")),
+                List.of(IgnoredPath.of("ignored", "/foo", true))
+        );
+        final RequestDetails requestDetails = new RequestDetails(rulePath, "");
+        assertThat(RewriteURLFilter.getRewrittenUrl(rewriteConfig, requestDetails))
+                .isEqualTo("/a");
+    }
+
+    @Test
+    void getRewrittenIgnoredPath() {
+        final RewriteConfig rewriteConfig = new RewriteConfig(
+                List.of(RewriteRule.of("/#{title}", "/a")),
+                List.of(IgnoredPath.of("ignored", "/bar", false))
+        );
+        final RequestDetails requestDetails = new RequestDetails("/foo", "");
+        assertThat(RewriteURLFilter.getRewrittenUrl(rewriteConfig, requestDetails))
+                .isEqualTo("/a?title=foo");
+    }
 }
