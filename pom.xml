@@ -6,7 +6,7 @@
 
     <groupId>io.github.markwinton</groupId>
     <artifactId>pathfaces</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <properties>

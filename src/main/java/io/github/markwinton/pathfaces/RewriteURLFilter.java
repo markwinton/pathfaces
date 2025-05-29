@@ -44,7 +44,8 @@ public class RewriteURLFilter implements Filter {
         final String rewriteUrl = getRewrittenUrl(rewriteRules, requestDetails);
         if (rewriteUrl != null && !rewriteUrl.isBlank()) {
             final RequestDispatcher dispatcher = wrapper.getRequestDispatcher(rewriteUrl);
-            dispatcher.forward(request, response);
+            // .include rather than .forward so that URL in the browser does not change
+            dispatcher.include(request, response);
             return;
         }
         chain.doFilter(wrapper, response);
